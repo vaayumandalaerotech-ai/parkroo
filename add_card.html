@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add a New Payment Method</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h1 { color: #333; }
+        #payment-element { margin-bottom: 1.5rem; }
+        button { background-color: #007bff; color: white; border: none; padding: 12px 15px; border-radius: 4px; width: 100%; font-size: 16px; cursor: pointer; transition: background-color 0.2s; }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        #error-message { color: #dc3545; margin-top: 1rem; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add a New Card</h1>
+        <p>Your card details will be saved securely for future bookings.</p>
+        <form id="setup-form">
+            <div id="payment-element">
+                <!-- Stripe.js will inject the Payment Element here -->
+            </div>
+            <button id="submit">
+                <span id="button-text">Save Card</span>
+            </button>
+            <div id="error-message">
+                <!-- Display error messages here -->
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const publishableKey = urlParams.get('pk');
+
+        if (!publishableKey) {
+            document.getElementById('error-message').textContent = "Configuration error: Publishable key is missing.";
+        }
+
+        const stripe = Stripe(publishableKey);
+
+        let elements;
+
+        initialize();
+
+        document.getElementById("setup-form").addEventListener("submit", handleSubmit);
+
+        // Fetches a SetupIntent and captures the client secret
+        async function initialize() {
+            const response = await fetch("http://localhost:8000/api/payment-methods/setup", {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+            });
+
+            if (!response.ok) {
+                const { detail } = await response.json();
+                document.getElementById('error-message').textContent = `Error: ${detail || response.statusText}`;
+                return;
+            }
+
+            const { clientSecret } = await response.json();
+
+            elements = stripe.elements({ clientSecret });
+
+            const paymentElement = elements.create("payment");
+            paymentElement.mount("#payment-element");
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            document.getElementById('submit').disabled = true;
+
+            const { error } = await stripe.confirmSetup({
+                elements,
+                confirmParams: { return_url: `http://localhost:8501?card_saved=true` },
+            });
+
+            if (error) {
+                // This point will only be reached if there is an immediate error when
+                // confirming the setup. Otherwise, your customer will be redirected.
+                document.getElementById('error-message').textContent = error.message;
+                document.getElementById('submit').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

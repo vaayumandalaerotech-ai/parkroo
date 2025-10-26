@@ -1,0 +1,26 @@
+{
+    "name": "My Awesome App",
+    "short_name": "MyApp",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#000000",
+    "description": "A description of your application.",
+    "icons": [
+        {
+            "src": "https://www.gstatic.com/images/branding/product/1x/google_cloud_48dp.png",
+            "sizes": "48x48",
+            "type": "image/png"
+        },
+        {
+            "src": "https://www.gstatic.com/images/branding/product/1x/google_cloud_96dp.png",
+            "sizes": "96x96",
+            "type": "image/png"
+        },
+        {
+            "src": "https://www.gstatic.com/images/branding/product/1x/google_cloud_192dp.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ]
+}

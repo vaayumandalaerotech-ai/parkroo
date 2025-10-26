@@ -1,0 +1,14 @@
+# m:\nishant\nishant app in python\new3\requirements.txt
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+geopy
+pandas
+requests
+python-dotenv
+python-jose[cryptography]
+passlib[bcrypt]
+fastapi-mail
+streamlit
+folium
