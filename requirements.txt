@@ -18,3 +18,5 @@ folium
 gunicorn
 httpx
 aiohttp
+pydantic>=2.0.0
+fastapi-mail>=1.4.1
